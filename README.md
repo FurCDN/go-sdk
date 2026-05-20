@@ -1,4 +1,4 @@
-# FurCDN-API-Go
+# go-sdk
 
 [FurCDN](https://www.furcdn.us) 開放 API 的 Go SDK。
 
@@ -7,7 +7,7 @@
 ## 安裝
 
 ```bash
-go get github.com/FurCDN/FurCDN-API-Go
+go get github.com/FurCDN/go-sdk
 ```
 
 ## 使用
@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"log"
 
-	furcdn "github.com/FurCDN/FurCDN-API-Go"
+	furcdn "github.com/FurCDN/go-sdk"
 )
 
 func main() {
