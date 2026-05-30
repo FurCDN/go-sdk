@@ -89,6 +89,27 @@ func TestUploadSSL(t *testing.T) {
 	}
 }
 
+func TestOriginIPs(t *testing.T) {
+	c, srv := newTestClient(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/api/public/origin-ips" || r.Method != http.MethodGet {
+			t.Errorf("got %s %s", r.Method, r.URL.Path)
+		}
+		if r.URL.Query().Get("format") != "json" {
+			t.Errorf("format = %s", r.URL.Query().Get("format"))
+		}
+		_, _ = w.Write([]byte(`{"ips":["1.2.3.4","5.6.7.8"],"count":2}`))
+	})
+	defer srv.Close()
+
+	ips, err := c.OriginIPs(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(ips) != 2 || ips[0] != "1.2.3.4" || ips[1] != "5.6.7.8" {
+		t.Errorf("unexpected: %+v", ips)
+	}
+}
+
 func TestAPIError(t *testing.T) {
 	c, srv := newTestClient(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusUnauthorized)

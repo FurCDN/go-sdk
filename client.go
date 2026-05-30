@@ -38,6 +38,11 @@ type OKResponse struct {
 	OK bool `json:"ok"`
 }
 
+type OriginIPsResponse struct {
+	IPs   []string `json:"ips"`
+	Count int      `json:"count"`
+}
+
 type APIError struct {
 	StatusCode int
 	Message    string
@@ -81,6 +86,19 @@ func (c *Client) UploadSSL(ctx context.Context, domainID int64, cert, key string
 	body := map[string]string{"cert": cert, "key": key}
 	var resp OKResponse
 	return c.do(ctx, http.MethodPost, path, body, &resp)
+}
+
+// OriginIPs 取得目前全部節點的回源 IP，供源站防火牆白名單使用。
+//
+// 這是公開端點，不需要 API key（SDK 仍會帶上 Authorization，端點會忽略）。
+// 清單「不是固定的」：節點隨時新增 / 下線 / 換 IP。請勿寫死，建議每 5~10 分鐘
+// 重新取得後同步防火牆規則。更可靠的回源鑑別方式是自定義回源 header。
+func (c *Client) OriginIPs(ctx context.Context) ([]string, error) {
+	var resp OriginIPsResponse
+	if err := c.do(ctx, http.MethodGet, "/api/public/origin-ips?format=json", nil, &resp); err != nil {
+		return nil, err
+	}
+	return resp.IPs, nil
 }
 
 func (c *Client) do(ctx context.Context, method, path string, body any, out any) error {
